@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ドラマト11th＆スタマイ10th アニバストア</title>
+  <!-- html2canvas ライブラリの読み込み -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    :root {
+      --primary: #6b5b95;
+      --accent: #ff6b6b;
+      --bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --border: #e9ecef;
+      --text: #333333;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 15px;
+      padding-bottom: 110px;
+    }
+    h1 { text-align: center; font-size: 1.4rem; color: var(--primary); margin-bottom: 15px; }
+    .tabs { display: flex; gap: 5px; margin-bottom: 15px; }
+    .tab-btn {
+      flex: 1; padding: 10px; border: none; background: #ddd;
+      font-weight: bold; border-radius: 6px; cursor: pointer;
+    }
+    .tab-btn.active { background: var(--primary); color: white; }
+    .section-title {
+      background: var(--primary); color: white; padding: 8px 12px;
+      border-radius: 4px; margin-top: 20px; font-size: 1rem;
+    }
+    .sub-title { font-weight: bold; margin: 15px 0 5px; border-bottom: 2px solid var(--primary); padding-bottom: 3px; font-size: 0.9rem; }
+    
+    .item-card {
+      background: var(--card-bg); border: 1px solid var(--border);
+      padding: 10px; border-radius: 6px; margin-bottom: 8px;
+    }
+    .item-main {
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .item-info { flex: 1; }
+    .item-name { font-weight: bold; font-size: 0.9rem; }
+    .item-price { font-size: 0.85rem; color: #666; }
+    .counter { display: flex; align-items: center; gap: 8px; }
+    .counter button {
+      width: 28px; height: 28px; border: 1px solid #ccc;
+      background: #fff; border-radius: 4px; font-weight: bold; cursor: pointer;
+    }
+    .counter input {
+      width: 40px; text-align: center; border: 1px solid #ccc;
+      border-radius: 4px; padding: 4px;
+    }
+    
+    /* キャラ別展開エリア */
+    .char-toggle-btn {
+      margin-top: 5px; background: #f0edf5; border: 1px solid var(--primary);
+      color: var(--primary); font-size: 0.75rem; padding: 4px 8px; border-radius: 4px;
+      cursor: pointer; font-weight: bold;
+    }
+    .char-list {
+      display: none; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 6px; margin-top: 10px; padding-top: 8px; border-top: 1px dashed #ccc;
+    }
+    .char-list.open { display: grid; }
+    .char-item {
+      background: #f9f9f9; padding: 6px; border-radius: 4px; border: 1px solid #eee;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .char-name-label { font-size: 0.75rem; font-weight: bold; }
+
+    .footer-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #222; color: white; padding: 10px 20px 12px 20px;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+    .footer-row { display: flex; justify-content: space-between; align-items: center; }
+    .total-price-text { font-size: 1.2rem; font-weight: bold; }
+    .bonus-box {
+      margin-top: 6px; padding-top: 6px; border-top: 1px solid #444;
+      display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #ffeb3b;
+    }
+    .next-bonus { font-size: 0.75rem; color: #ccc; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* 画像出力ボタン */
+    .download-btn {
+      background: var(--accent); color: white; border: none; padding: 6px 12px;
+      font-size: 0.85rem; font-weight: bold; border-radius: 20px; cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    /* 画像化用のサマリーカード */
+    #summary-card {
+      display: none; width: 500px; background: #ffffff; padding: 20px;
+      border-radius: 12px; border: 2px solid #6b5b95;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #333; position: absolute; top: -9999px; left: -9999px;
+    }
+    #summary-card h2 {
+      margin: 0 0 10px 0; font-size: 1.2rem; color: #6b5b95;
+      text-align: center; border-bottom: 2px dashed #6b5b95; padding-bottom: 8px;
+    }
+    .summary-group-hdr {
+      background: #6b5b95; color: #fff; padding: 4px 8px; font-size: 0.85rem;
+      font-weight: bold; margin-top: 10px; border-radius: 3px;
+    }
+    .summary-sub-hdr {
+      background: #f0edf5; color: #6b5b95; padding: 3px 6px; font-size: 0.8rem;
+      font-weight: bold; margin-top: 5px; border-left: 3px solid #6b5b95;
+    }
+    .summary-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+    .summary-table td { padding: 5px 6px; font-size: 0.8rem; border-bottom: 1px dashed #eee; }
+    .summary-table td.qty, .summary-table td.subtotal { text-align: right; }
+    
+    .summary-total-box {
+      background: #222; color: #fff; padding: 12px 15px; border-radius: 8px; margin-top: 15px;
+    }
+    .summary-total-row { display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: bold; margin-bottom: 5px; }
+    .summary-bonus-row { display: flex; justify-content: space-between; font-size: 0.9rem; color: #ffeb3b; border-top: 1px solid #444; padding-top: 5px; }
+  </style>
+</head>
+<body>
+
+  <h1>ドラマト11th＆スタマイ10th アニバストア／グッズ計算</h1>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('first')">前半</button>
+    <button class="tab-btn" onclick="switchTab('second')">後半</button>
+  </div>
+
+  <!-- 前半 -->
+  <div id="tab-first" class="tab-content active">
+    <div class="section-title">ドラッグ王子とマトリ姫（前半）</div>
+    <div class="sub-title">① オープン商品（キャラ別）</div>
+    <div id="first-dm-char-items"></div>
+    <div class="sub-title">① オープン商品（その他）</div>
+    <div id="first-dm-open-items"></div>
+    <div class="sub-title">② トレーディング商品</div>
+    <div id="first-dm-trade-items"></div>
+
+    <div class="section-title">スタンドマイヒーローズ（前半）</div>
+    <div class="sub-title">① オープン商品（キャラ別）</div>
+    <div id="first-sm-char-items"></div>
+    <div class="sub-title">① オープン商品（所属別・その他）</div>
+    <div id="first-sm-open-items"></div>
+    <div class="sub-title">② トレーディング商品</div>
+    <div id="first-sm-trade-items"></div>
+  </div>
+
+  <!-- 後半 -->
+  <div id="tab-second" class="tab-content">
+    <div class="section-title">ドラッグ王子とマトリ姫（後半）</div>
+    <div class="sub-title">① オープン商品（キャラ別）</div>
+    <div id="second-dm-char-items"></div>
+    <div class="sub-title">① オープン商品（その他）</div>
+    <div id="second-dm-open-items"></div>
+    <div class="sub-title">② トレーディング商品</div>
+    <div id="second-dm-trade-items"></div>
+
+    <div class="section-title">スタンドマイヒーローズ（後半）</div>
+    <div class="sub-title">① オープン商品（キャラ別）</div>
+    <div id="second-sm-char-items"></div>
+    <div class="sub-title">① オープン商品（所属別・BOX・その他）</div>
+    <div id="second-sm-open-items"></div>
+    <div class="sub-title">② トレーディング商品</div>
+    <div id="second-sm-trade-items"></div>
+  </div>
+
+  <!-- 画像化用のサマリー要素（画面外配置） -->
+  <div id="summary-card">
+    <h2>ドラマト11th＆スタマイ10th アニバストア／購入リスト</h2>
+    <div id="summary-content"></div>
+    <div class="summary-total-box">
+      <div class="summary-total-row">
+        <span>合計金額</span>
+        <span id="summary-total-price">¥0</span>
+      </div>
+      <div class="summary-bonus-row">
+        <span>🎁 特典獲得数</span>
+        <span><strong id="summary-bonus-count">0</strong> 枚</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- フッター -->
+  <div class="footer-bar">
+    <div class="footer-row">
+      <div>
+        <span style="font-size:0.8rem; color:#aaa;">合計金額</span><br>
+        <span id="total-price" class="total-price-text">¥0</span>
+      </div>
+      <button class="download-btn" onclick="generateImage()">📸 画像として保存</button>
+    </div>
+    <div class="bonus-box">
+      <span>🎁 特典獲得数: <strong id="bonus-count">0</strong> 枚</span>
+      <span id="next-bonus" class="next-bonus">（あと ¥3,000 で+1枚）</span>
+    </div>
+  </div>
+
+<script>
+// キャラ定義
+const charsDoramato = ["青山 樹", "由井 孝太郎", "関 大輔", "夏目 春", "今大路 峻", "渡部 悟", "朝霧 司", "菅野 夏樹", "荒木田 蒼生", "服部 耀"];
+const charsStamai = ["青山 樹", "由井 孝太郎", "関 大輔", "夏目 春", "今大路 峻", "渡部 悟", "朝霧 司", "菅野 夏樹", "荒木田 蒼生", "服部 耀", "桧山 貴臣", "大谷 羽鳥", "神楽 亜貴", "槙 慶太", "都築 誠", "都築 京介", "新堂 清志", "カナメ・アラストール", "桐嶋 宏弥", "九条 壮馬", "宮瀬 豪", "可愛 ひかる", "宝生 潔", "日向 志音", "早乙女 郁人", "瀬尾 鳴海"];
+
+const itemsData = {
+  first: {
+    dmChar: [
+      { name: "ハート型アクスタ", price: 1540 },
+      { name: "アクリルスタンド「Catch Your Eye」", price: 1980 },
+      { name: "ビジュアルタオル「Catch Your Eye」", price: 3520 }
+    ],
+    dmOpen: [
+      { name: "ココアハートクッキー／マトリ", price: 858 },
+      { name: "ココアハートクッキー／捜査一課", price: 858 }
+    ],
+    dmTrade: [
+      { name: "ポスカ「Happy Moment」", price: 330 },
+      { name: "クリカ「Happy Moment」", price: 330 }
+    ],
+    smChar: [
+      { name: "アクスタ「Hands in Black」", price: 1650 },
+      { name: "ホログラムアクリルキーホルダー「Hands in Black」", price: 990 },
+      { name: "ビジュアルタオル", price: 3850 }
+    ],
+    smOpen: [
+      { name: "サンドクッキー「Hands in Black」", price: 1728 },
+      { name: "入浴剤", price: 3300 },
+      { name: "缶バッジ「Hands in Black」【マトリ・都築兄弟・九条家】1BOX", price: 7150 },
+      { name: "缶バッジ「Hands in Black」【警視庁・Revel・瀬尾研究室】1BOX", price: 7150 },
+      { name: "ポスターセット「Hands in Black」マトリ・都築兄弟", price: 3000 },
+      { name: "ポスターセット「Hands in Black」警視庁・九条家", price: 3300 },
+      { name: "ポスターセット「Hands in Black」Revel・瀬尾研究室", price: 3300 }
+    ],
+    smTrade: [
+      { name: "缶バッジ「Hands in Black」【マトリ・都築兄弟・九条家】", price: 550 },
+      { name: "缶バッジ「Hands in Black」【警視庁・Revel・瀬尾研究室】", price: 550 },
+      { name: "フォト風カード「Hands in Black」（2枚入り）", price: 440 },
+      { name: "メタリックイラストカード「Hands in Black」", price: 440 },
+      { name: "A5クリアファイル「Hands in Black」", price: 440 },
+      { name: "クリアカード「Countdown To Anniversary」", price: 330 }
+    ]
+  },
+  second: {
+    dmChar: [
+      { name: "ポスター「Catch Your Eye」", price: 550 },
+      { name: "アクリルキーホルダー「Catch Your Eye」", price: 880 },
+      { name: "デカンバッチ「Catch Your Eye」", price: 1100 },
+      { name: "tea set can「Catch Your Eye」", price: 2484 }
+    ],
+    dmOpen: [
+      { name: "ホログラム缶バッジ「Catch Your Eye」1BOX", price: 5500 },
+      { name: "クリアファイル「Catch Your Eye」／マトリ", price: 770 },
+      { name: "クリアファイル「Catch Your Eye」／捜査一課", price: 770 },
+      { name: "stick cake「Catch Your Eye」／マトリ", price: 1512 },
+      { name: "stick cake「Catch Your Eye」／捜査一課", price: 1512 },
+      { name: "11th Anniversary トートバッグ", price: 3300 },
+      { name: "ミラー＆ステッカーセット「Catch Your Eye」／マトリ", price: 770 },
+      { name: "ミラー＆ステッカーセット「Catch Your Eye」／捜査一課", price: 770 }
+    ],
+    dmTrade: [
+      { name: "ホログラム缶バッジ「Catch Your Eye」", price: 550 },
+      { name: "クリアカード「Catch Your Eye」（2枚入り）", price: 550 },
+      { name: "イラストカード「Catch Your Eye」", price: 550 },
+      { name: "ポストカード「From his perspective」", price: 330 }
+    ],
+    smChar: [
+      { name: "Premium アクリルスタンド 10th Anniversary", price: 2750 },
+      { name: "Premium 台紙付きブロマイド 10th Anniversary", price: 3000 },
+      { name: "10th Anniversary クリアポスター", price: 880 },
+      { name: "10th Anniversary ロングクッション", price: 4950 },
+      { name: "10th Anniversary デカンバッチ", price: 1100 },
+      { name: "10th Anniversary mini シャカシャカアクリルキーホルダー", price: 1650 },
+      { name: "10th Anniversary mini アクリルクリップセット", price: 1320 },
+      { name: "10th Anniversary mini ホログラム缶バッジ", price: 880 },
+      { name: "10th Anniversary mini ミニプレッツェル", price: 1320 },
+      { name: "メモリアルステッカーシート", price: 770 },
+      { name: "10th Anniversary 婚姻届", price: 1540 },
+      { name: "10th Anniversary プリザーブドフラワー", price: 6600 },
+      { name: "10th Anniversary 席札風キーホルダー", price: 748 },
+      { name: "アクリルスタンド(UR柄）", price: 1650 }
+    ],
+    smOpen: [
+      { name: "10th Anniversary mini 手ぬぐい", price: 1540 },
+      { name: "10th Anniversary 缶バッジ【マトリ・都築兄弟・九条家】BOX", price: 7150 },
+      { name: "10th Anniversary 缶バッジ【警視庁・Revel・瀬尾研究室】BOX", price: 7150 },
+      { name: "10th Anniversary miniアクスタ【マトリ・都築兄弟・九条家】BOX", price: 11440 },
+      { name: "10th Anniversary miniアクスタ【警視庁・Revel・瀬尾研究室】BOX", price: 11440 },
+      { name: "10th Anniversary バウムクーヘン", price: 2952 },
+      { name: "ジュエルコンフェペティ【マトリ・都築兄弟】", price: 902 },
+      { name: "ジュエルコンフェペティ【警視庁・九条家】", price: 902 },
+      { name: "ジュエルコンフェペティ【Revel・瀬尾研究室】", price: 902 },
+      { name: "10th Anniversary メタルキーホルダー", price: 1320 },
+      { name: "10th Anniversary トートバッグ", price: 3300 }
+    ],
+    smTrade: [
+      { name: "10th Anniversary 缶バッジ【マトリ・都築兄弟・九条家】", price: 550 },
+      { name: "10th Anniversary 缶バッジ【警視庁・Revel・瀬尾研究室】", price: 550 },
+      { name: "10th Anniversary クリアカード（2枚入り）", price: 550 },
+      { name: "クリア色紙 10th Anniversary", price: 660 },
+      { name: "10th Anniversary BIGしおり（2枚入り）", price: 330 },
+      { name: "10th Anniversary トSNS風クリアカード", price: 550 },
+      { name: "10th Anniversary オーロラアクリルキューブ", price: 935 },
+      { name: "10th Anniversary ダイカットステッカー", price: 440 },
+      { name: "10th Anniversary miniアクスタ【マトリ・都築兄弟・九条家】", price: 880 },
+      { name: "10th Anniversary miniアクスタ【警視庁・Revel・瀬尾研究室】", price: 880 },
+      { name: "10th Anniversary miniダイカットホログラムカード", price: 440 },
+      { name: "10th Anniversary miniアクリルチャーム", price: 660 },
+      { name: "10th Anniversary miniアクリルリング", price: 880 },
+      { name: "アルバムカード", price: 660 },
+      { name: "缶バッジ「UR Card Collection」第二弾【マトリ・都築兄弟・九条家】", price: 440 },
+      { name: "缶バッジ「UR Card Collection」第二弾【警視庁・Revel・瀬尾研究室】", price: 440 },
+      { name: "ホログラムカード「UR Card Collection」第二弾【マトリ・都築兄弟・九条家】", price: 330 },
+      { name: "ホログラムカード「UR Card Collection」第二弾【警視庁・Revel・瀬尾研究室】", price: 330 }
+    ]
+  }
+};
+
+function createItemCard(item, isCharItem = false, charList = [], periodKey = "", categoryKey = "", index = 0) {
+  if (!isCharItem) {
+    return `
+      <div class="item-card">
+        <div class="item-main">
+          <div class="item-info">
+            <div class="item-name">${item.name}</div>
+            <div class="item-price">¥${item.price.toLocaleString()}</div>
+          </div>
+          <div class="counter">
+            <button onclick="updateQty(this, -1)">-</button>
+            <input type="number" value="0" min="0" data-period="${periodKey}" data-category="${categoryKey}" data-name="${item.name}" data-price="${item.price}" onchange="calculateTotal()">
+            <button onclick="updateQty(this, 1)">+</button>
+          </div>
+        </div>
+      </div>
+    `;
+  } else {
+    const listId = `char-list-${periodKey}-${categoryKey}-${index}`;
+    const charsHtml = charList.map(c => `
+      <div class="char-item">
+        <span class="char-name-label">${c}</span>
+        <div class="counter">
+          <button onclick="updateQty(this, -1)">-</button>
+          <input type="number" value="0" min="0" data-period="${periodKey}" data-category="${categoryKey}" data-name="${item.name}" data-char="${c}" data-price="${item.price}" onchange="calculateTotal()">
+          <button onclick="updateQty(this, 1)">+</button>
+        </div>
+      </div>
+    `).join('');
+
+    return `
+      <div class="item-card">
+        <div class="item-main">
+          <div class="item-info">
+            <div class="item-name">${item.name}</div>
+            <div class="item-price">¥${item.price.toLocaleString()}</div>
+          </div>
+          <button class="char-toggle-btn" onclick="toggleCharList('${listId}')">キャラ別に選択 👤</button>
+        </div>
+        <div class="char-list" id="${listId}">
+          ${charsHtml}
+        </div>
+      </div>
+    `;
+  }
+}
+
+function toggleCharList(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+function renderSection(elementId, items, isChar = false, charList = [], periodKey = "", categoryKey = "") {
+  const container = document.getElementById(elementId);
+  container.innerHTML = items.map((item, idx) => createItemCard(item, isChar, charList, periodKey, categoryKey, idx)).join('');
+}
+
+function renderAll() {
+  ['first', 'second'].forEach(period => {
+    const charD = charsDoramato;
+    const charS = charsStamai;
+    
+    renderSection(`${period}-dm-char-items`, itemsData[period].dmChar, true, charD, period, "ドラマト（キャラ別）");
+    renderSection(`${period}-dm-open-items`, itemsData[period].dmOpen, false, [], period, "ドラマト（その他）");
+    renderSection(`${period}-dm-trade-items`, itemsData[period].dmTrade, false, [], period, "ドラマト（トレーディング）");
+    
+    renderSection(`${period}-sm-char-items`, itemsData[period].smChar, true, charS, period, "スタマイ（キャラ別）");
+    renderSection(`${period}-sm-open-items`, itemsData[period].smOpen, false, [], period, "スタマイ（その他）");
+    renderSection(`${period}-sm-trade-items`, itemsData[period].smTrade, false, [], period, "スタマイ（トレーディング）");
+  });
+}
+
+function updateQty(btn, change) {
+  const input = btn.parentElement.querySelector('input');
+  let currentVal = parseInt(input.value) || 0;
+  currentVal = Math.max(0, currentVal + change);
+  input.value = currentVal;
+  calculateTotal();
+}
+
+function calculateTotal() {
+  let total = 0;
+  document.querySelectorAll('input[type="number"]').forEach(input => {
+    const qty = parseInt(input.value) || 0;
+    const price = parseInt(input.dataset.price) || 0;
+    total += qty * price;
+  });
+
+  document.getElementById('total-price').innerText = `¥${total.toLocaleString()}`;
+
+  const bonusUnit = 3000;
+  const bonusCount = Math.floor(total / bonusUnit);
+  const remainder = total % bonusUnit;
+  const needed = bonusUnit - remainder;
+
+  document.getElementById('bonus-count').innerText = bonusCount;
+  
+  if (total === 0) {
+    document.getElementById('next-bonus').innerText = `（あと ¥3,000 で+1枚）`;
+  } else if (remainder === 0) {
+    document.getElementById('next-bonus').innerText = `（ちょうど達成！🎉）`;
+  } else {
+    document.getElementById('next-bonus').innerText = `（あと ¥${needed.toLocaleString()} で+1枚）`;
+  }
+}
+
+function switchTab(tabName) {
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+  
+  if (tabName === 'first') {
+    document.querySelectorAll('.tab-btn')[0].classList.add('active');
+    document.getElementById('tab-first').classList.add('active');
+  } else {
+    document.querySelectorAll('.tab-btn')[1].classList.add('active');
+    document.getElementById('tab-second').classList.add('active');
+  }
+}
+
+function generateImage() {
+  let groupedItems = {};
+  let total = 0;
+
+  document.querySelectorAll('input[type="number"]').forEach(input => {
+    const qty = parseInt(input.value) || 0;
+    if (qty > 0) {
+      const period = input.dataset.period === 'first' ? '【前半】' : '【後半】';
+      const category = input.dataset.category;
+      const name = input.dataset.name;
+      const charName = input.dataset.char;
+      const price = parseInt(input.dataset.price) || 0;
+      const subtotal = qty * price;
+      total += subtotal;
+
+      const fullItemName = charName ? `${name} [${charName}]` : name;
+
+      if (!groupedItems[period]) groupedItems[period] = {};
+      if (!groupedItems[period][category]) groupedItems[period][category] = [];
+
+      groupedItems[period][category].push({ name: fullItemName, qty, subtotal });
+    }
+  });
+
+  if (Object.keys(groupedItems).length === 0) {
+    alert('商品が1つも選択されていません。');
+    return;
+  }
+
+  // サマリー生成
+  const summaryContent = document.getElementById('summary-content');
+  summaryContent.innerHTML = '';
+
+  for (const [period, categories] of Object.entries(groupedItems)) {
+    let periodHdr = document.createElement('div');
+    periodHdr.className = 'summary-group-hdr';
+    periodHdr.innerText = period;
+    summaryContent.appendChild(periodHdr);
+
+    for (const [category, items] of Object.entries(categories)) {
+      let catHdr = document.createElement('div');
+      catHdr.className = 'summary-sub-hdr';
+      catHdr.innerText = category;
+      summaryContent.appendChild(catHdr);
+
+      let table = document.createElement('table');
+      table.className = 'summary-table';
+      
+      let rowsHtml = items.map(item => `
+        <tr>
+          <td>${item.name}</td>
+          <td class="qty" style="width: 40px;">${item.qty}</td>
+          <td class="subtotal" style="width: 70px;">¥${item.subtotal.toLocaleString()}</td>
+        </tr>
+      `).join('');
+      
+      table.innerHTML = rowsHtml;
+      summaryContent.appendChild(table);
+    }
+  }
+
+  document.getElementById('summary-total-price').innerText = `¥${total.toLocaleString()}`;
+  document.getElementById('summary-bonus-count').innerText = Math.floor(total / 3000);
+
+  // キャプチャ用に表示
+  const summaryCard = document.getElementById('summary-card');
+  summaryCard.style.display = 'block';
+
+  html2canvas(summaryCard, { scale: 2 }).then(canvas => {
+    summaryCard.style.display = 'none'; // 非表示に戻す
+
+    // PNGダウンロード
+    const link = document.createElement('a');
+    link.download = 'goods_order_summary.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }).catch(err => {
+    summaryCard.style.display = 'none';
+    alert('画像の作成に失敗しました。');
+  });
+}
+
+renderAll();
+</script>
+</body>
+</html>
