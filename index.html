@@ -21,7 +21,7 @@
       color: var(--text);
       margin: 0;
       padding: 15px;
-      padding-bottom: 150px; /* クリエイター情報分の余白確保 */
+      padding-bottom: 150px;
     }
     h1 { text-align: center; font-size: 1.4rem; color: var(--primary); margin-bottom: 15px; }
     .tabs { display: flex; gap: 5px; margin-bottom: 15px; }
@@ -56,7 +56,7 @@
       border-radius: 4px; padding: 4px;
     }
     
-    /* キャラ別展開エリア */
+    /* トグルボタン＆展開エリア */
     .char-toggle-btn {
       margin-top: 5px; background: #f0edf5; border: 1px solid var(--primary);
       color: var(--primary); font-size: 0.75rem; padding: 4px 8px; border-radius: 4px;
@@ -125,97 +125,34 @@
     .summary-total-row { display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: bold; margin-bottom: 5px; }
     .summary-bonus-row { display: flex; justify-content: space-between; font-size: 0.9rem; color: #ffeb3b; border-top: 1px solid #444; padding-top: 5px; }
 
-    /* 作成者情報エリアのCSS追加・サイズ調整 */
+    /* 作成者情報エリア */
     .creator {
       margin-top: 30px;
-      padding: 15px;
+      padding: 12px 15px;
       background: #fff;
       border-radius: 8px;
       border: 1px solid var(--border);
-      text-align: center;
       font-size: 0.85rem;
       color: #555;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
+      justify-content: center;
       align-items: center;
-      gap: 10px;
+      flex-wrap: wrap;
+      gap: 15px;
     }
     .creator-link {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
       color: var(--primary);
       text-decoration: none;
       font-weight: bold;
     }
-    .creator-link:hover {
-      text-decoration: underline;
-    }
-    /* Xアイコンサイズのサイズ指定 */
-    .creator svg {
-      width: 16px;
-      height: 16px;
-      fill: currentColor;
-    }
-    .home-back {
-      margin-top: 5px;
-    }
-    .home-link {
-      color: #666;
-      text-decoration: none;
-      font-size: 0.8rem;
-    }
-    
-    /* 作成者情報エリア（横並び化） */
-.creator {
-  margin-top: 30px;
-  padding: 12px 15px;
-  background: #fff;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  font-size: 0.85rem;
-  color: #555;
-  
-  /* 横並びのレイアウト設定 */
-  display: flex;
-  flex-direction: row;        /* 横並び指定 */
-  justify-content: center;    /* 中央寄せ */
-  align-items: center;        /* 上下方向の中央揃え */
-  flex-wrap: wrap;            /* 画面が狭い時に自動で折り返し */
-  gap: 15px;                  /* 要素同士の間隔 */
-}
-
-/* 内部リンクの表示設定 */
-.creator-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--primary);
-  text-decoration: none;
-  font-weight: bold;
-}
-
-.creator-link:hover {
-  text-decoration: underline;
-}
-
-/* Xアイコンのサイズ固定 */
-.creator svg {
-  width: 14px;
-  height: 14px;
-  fill: currentColor;
-}
-
-/* HOMEリンクのマージンリセット */
-.home-back {
-  margin-top: 0;
-}
-
-.home-link {
-  color: #666;
-  text-decoration: none;
-  font-size: 0.8rem;
-}
+    .creator-link:hover { text-decoration: underline; }
+    .creator svg { width: 14px; height: 14px; fill: currentColor; }
+    .home-back { margin-top: 0; }
+    .home-link { color: #666; text-decoration: none; font-size: 0.8rem; }
   </style>
 </head>
 <body>
@@ -265,7 +202,7 @@
     <div id="second-sm-trade-items"></div>
   </div>
 
-  <!-- 画像化用のサマリー要素（画面外配置） -->
+  <!-- 画像化用のサマリー要素 -->
   <div id="summary-card">
     <h2>ドラマト11th＆スタマイ10th アニバストア／購入リスト</h2>
     <div id="summary-content"></div>
@@ -328,9 +265,10 @@
   </div>
 
 <script>
-// キャラ定義
-const charsDoramato = ["青山", "由井", "関	", "夏目", "今大路", "渡部", "朝霧", "菅野", "荒木田", "服部"];
-const charsStamai = ["青山", "由井", "関	", "夏目", "今大路", "渡部", "朝霧", "菅野", "荒木田", "服部", "桧山", "大谷", "神楽", "槙", "誠", "京介", "新堂", "カナメ", "桐嶋", "九条", "宮瀬", "可愛", "宝生", "日向", "早乙女", "瀬尾"];
+// キャラ定義 & 所属定義
+const charsDoramato = ["青山", "由井", "関\t", "夏目", "今大路", "渡部", "朝霧", "菅野", "荒木田", "服部"];
+const charsStamai = ["青山", "由井", "関\t", "夏目", "今大路", "渡部", "朝霧", "菅野", "荒木田", "服部", "桧山", "大谷", "神楽", "槙", "誠", "京介", "新堂", "カナメ", "桐嶋", "九条", "宮瀬", "可愛", "宝生", "日向", "早乙女", "瀬尾"];
+const affiliations = ["マトリ", "警視庁", "Revel", "都築兄弟", "九条家", "瀬尾研究室"];
 
 const itemsData = {
   first: {
@@ -353,8 +291,9 @@ const itemsData = {
       { name: "ビジュアルタオル", price: 3850 }
     ],
     smOpen: [
-      { name: "サンドクッキー「Hands in Black」", price: 1728 },
-      { name: "入浴剤", price: 3300 },
+      // 所属展開フラグ (hasAffiliation: true) を追加
+      { name: "サンドクッキー「Hands in Black」", price: 1728, hasAffiliation: true },
+      { name: "入浴剤", price: 3300, hasAffiliation: true },
       { name: "缶バッジ「Hands in Black」【マトリ・都築兄弟・九条家】1BOX", price: 7150 },
       { name: "缶バッジ「Hands in Black」【警視庁・Revel・瀬尾研究室】1BOX", price: 7150 },
       { name: "ポスターセット「Hands in Black」マトリ・都築兄弟", price: 3000 },
@@ -410,7 +349,8 @@ const itemsData = {
       { name: "アクリルスタンド(UR柄）", price: 1650 }
     ],
     smOpen: [
-      { name: "10th Anniversary mini 手ぬぐい", price: 1540 },
+      // 所属展開フラグ (hasAffiliation: true) を追加
+      { name: "10th Anniversary mini 手ぬぐい", price: 1540, hasAffiliation: true },
       { name: "10th Anniversary 缶バッジ【マトリ・都築兄弟・九条家】BOX", price: 7150 },
       { name: "10th Anniversary 缶バッジ【警視庁・Revel・瀬尾研究室】BOX", price: 7150 },
       { name: "10th Anniversary miniアクスタ【マトリ・都築兄弟・九条家】BOX", price: 11440 },
@@ -447,7 +387,20 @@ const itemsData = {
 };
 
 function createItemCard(item, isCharItem = false, charList = [], periodKey = "", categoryKey = "", index = 0) {
-  if (!isCharItem) {
+  // 所属選択型の商品（手ぬぐい・サンドクッキー・入浴剤）
+  if (item.hasAffiliation) {
+    const listId = `affil-list-${periodKey}-${categoryKey}-${index}`;
+    const affilHtml = affiliations.map(a => `
+      <div class="char-item">
+        <span class="char-name-label">${a}</span>
+        <div class="counter">
+          <button onclick="updateQty(this, -1)">-</button>
+          <input type="number" value="0" min="0" data-period="${periodKey}" data-category="${categoryKey}" data-name="${item.name}" data-char="${a}" data-price="${item.price}" onchange="calculateTotal()">
+          <button onclick="updateQty(this, 1)">+</button>
+        </div>
+      </div>
+    `).join('');
+
     return `
       <div class="item-card">
         <div class="item-main">
@@ -455,15 +408,17 @@ function createItemCard(item, isCharItem = false, charList = [], periodKey = "",
             <div class="item-name">${item.name}</div>
             <div class="item-price">¥${item.price.toLocaleString()}</div>
           </div>
-          <div class="counter">
-            <button onclick="updateQty(this, -1)">-</button>
-            <input type="number" value="0" min="0" data-period="${periodKey}" data-category="${categoryKey}" data-name="${item.name}" data-price="${item.price}" onchange="calculateTotal()">
-            <button onclick="updateQty(this, 1)">+</button>
-          </div>
+          <button class="char-toggle-btn" onclick="toggleCharList('${listId}')">所属別に選択 🏢</button>
+        </div>
+        <div class="char-list" id="${listId}">
+          ${affilHtml}
         </div>
       </div>
     `;
-  } else {
+  }
+
+  // キャラ選択型の商品
+  if (isCharItem) {
     const listId = `char-list-${periodKey}-${categoryKey}-${index}`;
     const charsHtml = charList.map(c => `
       <div class="char-item">
@@ -491,6 +446,23 @@ function createItemCard(item, isCharItem = false, charList = [], periodKey = "",
       </div>
     `;
   }
+
+  // 通常商品
+  return `
+    <div class="item-card">
+      <div class="item-main">
+        <div class="item-info">
+          <div class="item-name">${item.name}</div>
+          <div class="item-price">¥${item.price.toLocaleString()}</div>
+        </div>
+        <div class="counter">
+          <button onclick="updateQty(this, -1)">-</button>
+          <input type="number" value="0" min="0" data-period="${periodKey}" data-category="${categoryKey}" data-name="${item.name}" data-price="${item.price}" onchange="calculateTotal()">
+          <button onclick="updateQty(this, 1)">+</button>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function toggleCharList(id) {
