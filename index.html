@@ -610,7 +610,7 @@ function generateImage() {
 
     // PNGダウンロード
     const link = document.createElement('a');
-    link.download = 'goods_order_summary.png';
+    link.download = '周年ストア購入リスト.png';
     link.href = canvas.toDataURL('image/png');
     link.click();
   }).catch(err => {
