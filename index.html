@@ -21,7 +21,7 @@
       color: var(--text);
       margin: 0;
       padding: 15px;
-      padding-bottom: 110px;
+      padding-bottom: 150px; /* クリエイター情報分の余白確保 */
     }
     h1 { text-align: center; font-size: 1.4rem; color: var(--primary); margin-bottom: 15px; }
     .tabs { display: flex; gap: 5px; margin-bottom: 15px; }
@@ -124,6 +124,98 @@
     }
     .summary-total-row { display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: bold; margin-bottom: 5px; }
     .summary-bonus-row { display: flex; justify-content: space-between; font-size: 0.9rem; color: #ffeb3b; border-top: 1px solid #444; padding-top: 5px; }
+
+    /* 作成者情報エリアのCSS追加・サイズ調整 */
+    .creator {
+      margin-top: 30px;
+      padding: 15px;
+      background: #fff;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      text-align: center;
+      font-size: 0.85rem;
+      color: #555;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .creator-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .creator-link:hover {
+      text-decoration: underline;
+    }
+    /* Xアイコンサイズのサイズ指定 */
+    .creator svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+    .home-back {
+      margin-top: 5px;
+    }
+    .home-link {
+      color: #666;
+      text-decoration: none;
+      font-size: 0.8rem;
+    }
+    
+    /* 作成者情報エリア（横並び化） */
+.creator {
+  margin-top: 30px;
+  padding: 12px 15px;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font-size: 0.85rem;
+  color: #555;
+  
+  /* 横並びのレイアウト設定 */
+  display: flex;
+  flex-direction: row;        /* 横並び指定 */
+  justify-content: center;    /* 中央寄せ */
+  align-items: center;        /* 上下方向の中央揃え */
+  flex-wrap: wrap;            /* 画面が狭い時に自動で折り返し */
+  gap: 15px;                  /* 要素同士の間隔 */
+}
+
+/* 内部リンクの表示設定 */
+.creator-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.creator-link:hover {
+  text-decoration: underline;
+}
+
+/* Xアイコンのサイズ固定 */
+.creator svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+/* HOMEリンクのマージンリセット */
+.home-back {
+  margin-top: 0;
+}
+
+.home-link {
+  color: #666;
+  text-decoration: none;
+  font-size: 0.8rem;
+}
   </style>
 </head>
 <body>
@@ -189,6 +281,37 @@
     </div>
   </div>
 
+  <!-- クリエイター情報エリア -->
+  <div class="creator">
+    <a 
+      href="https://twitter.com/intent/tweet?text=ドラマト11th&スタマイ10thアニバストアのグッズ購入シミュレーター%0Ahttps://ylocal-trhk.github.io/drmt11th_stmy10th/" 
+      target="_blank" 
+      rel="noopener" 
+      class="creator-link"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M18.244 2.25h3.308l-7.227 8.26L22.5 21.75h-6.594l-5.16-6.726-5.886 6.726H1.548l7.73-8.835L1.5 2.25h6.762l4.662 6.12 5.32-6.12Zm-1.16 17.52h1.833L7.62 4.125H5.655l11.43 15.645Z"/>
+      </svg>
+      <span>シェア</span>
+    </a>
+
+    <div>
+      作成者：
+      <a href="https://x.com/yLocal_trhk" target="_blank" rel="noopener" class="creator-link">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M18.244 2.25h3.308l-7.227 8.26L22.5 21.75h-6.594l-5.16-6.726-5.886 6.726H1.548l7.73-8.835L1.5 2.25h6.762l4.662 6.12 5.32-6.12Zm-1.16 17.52h1.833L7.62 4.125H5.655l11.43 15.645Z"/>
+        </svg>
+        <span>@yLocal_trhk</span>
+      </a>
+    </div>
+
+    <div class="home-back">
+      <a href="https://ylocal-trhk.github.io/HOME/" class="home-link">
+        ← HOMEに戻る
+      </a>
+    </div>
+  </div>
+
   <!-- フッター -->
   <div class="footer-bar">
     <div class="footer-row">
@@ -206,8 +329,8 @@
 
 <script>
 // キャラ定義
-const charsDoramato = ["青山 樹", "由井 孝太郎", "関 大輔", "夏目 春", "今大路 峻", "渡部 悟", "朝霧 司", "菅野 夏樹", "荒木田 蒼生", "服部 耀"];
-const charsStamai = ["青山 樹", "由井 孝太郎", "関 大輔", "夏目 春", "今大路 峻", "渡部 悟", "朝霧 司", "菅野 夏樹", "荒木田 蒼生", "服部 耀", "桧山 貴臣", "大谷 羽鳥", "神楽 亜貴", "槙 慶太", "都築 誠", "都築 京介", "新堂 清志", "カナメ・アラストール", "桐嶋 宏弥", "九条 壮馬", "宮瀬 豪", "可愛 ひかる", "宝生 潔", "日向 志音", "早乙女 郁人", "瀬尾 鳴海"];
+const charsDoramato = ["青山", "由井", "関	", "夏目", "今大路", "渡部", "朝霧", "菅野", "荒木田", "服部"];
+const charsStamai = ["青山", "由井", "関	", "夏目", "今大路", "渡部", "朝霧", "菅野", "荒木田", "服部", "桧山", "大谷", "神楽", "槙", "誠", "京介", "新堂", "カナメ", "桐嶋", "九条", "宮瀬", "可愛", "宝生", "日向", "早乙女", "瀬尾"];
 
 const itemsData = {
   first: {
