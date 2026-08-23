@@ -629,21 +629,28 @@ function generateImage() {
 
 renderAll();
 </script>
-  <script>
+ <script>
 document.addEventListener('DOMContentLoaded', () => {
   const STORAGE_KEY = 'drmt11th_stmy10th_state';
+
+  // inputのユニークキー（特定用識別子）を生成する関数
+  function getInputKey(el) {
+    if (el.id) return el.id;
+    if (el.name) return el.name;
+    // data属性を使って一意のキーを作成
+    const period = el.dataset.period || '';
+    const category = el.dataset.category || '';
+    const name = el.dataset.name || '';
+    const char = el.dataset.char || '';
+    return `${period}_${category}_${name}_${char}`;
+  }
 
   // --- 状態の保存 ---
   function saveState() {
     const data = {};
-    // チェックボックスや入力欄の状態を保存
-    document.querySelectorAll('input, textarea, select').forEach((el, index) => {
-      const key = el.id || el.name || `input_${index}`;
-      if (el.type === 'checkbox' || el.type === 'radio') {
-        data[key] = el.checked;
-      } else {
-        data[key] = el.value;
-      }
+    document.querySelectorAll('input[type="number"]').forEach((el) => {
+      const key = getInputKey(el);
+      data[key] = el.value;
     });
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   }
@@ -654,18 +661,22 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!saved) return;
     try {
       const data = JSON.parse(saved);
-      document.querySelectorAll('input, textarea, select').forEach((el, index) => {
-        const key = el.id || el.name || `input_${index}`;
+      document.querySelectorAll('input[type="number"]').forEach((el) => {
+        const key = getInputKey(el);
         if (data.hasOwnProperty(key)) {
-          if (el.type === 'checkbox' || el.type === 'radio') {
-            el.checked = data[key];
-          } else {
-            el.value = data[key];
+          el.value = data[key];
+
+          // 数値が入っている場合は、折りたたまれているキャラ/所属リストを開く
+          if (parseInt(data[key]) > 0) {
+            const charList = el.closest('.char-list');
+            if (charList) {
+              charList.classList.add('open');
+            }
           }
-          // changeイベントを発火させて表示の連動を更新
-          el.dispatchEvent(new Event('change', { bubbles: true }));
         }
       });
+      // 合計金額と特典数を再計算
+      calculateTotal();
     } catch (e) {
       console.error('復元エラー:', e);
     }
@@ -687,7 +698,7 @@ document.addEventListener('DOMContentLoaded', () => {
     resetBtn.addEventListener('click', resetState);
   }
 
-  // 初期読み込み時に復元
+  // 初期読み込み時に復元を実行
   loadState();
 });
 </script>
