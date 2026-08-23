@@ -267,9 +267,9 @@
   </div>
 
 <script>
-// キャラ定義 & 所属定義
-const charsDoramato = ["青山", "由井", "関\t", "夏目", "今大路", "渡部", "朝霧", "菅野", "荒木田", "服部"];
-const charsStamai = ["青山", "由井", "関\t", "夏目", "今大路", "渡部", "朝霧", "菅野", "荒木田", "服部", "桧山", "大谷", "神楽", "槙", "誠", "京介", "新堂", "カナメ", "桐嶋", "九条", "宮瀬", "可愛", "宝生", "日向", "早乙女", "瀬尾"];
+// キャラ定義 & 所属定義（※タブ文字「\t」を除去して整形）
+const charsDoramato = ["青山", "由井", "関", "夏目", "今大路", "渡部", "朝霧", "菅野", "荒木田", "服部"];
+const charsStamai = ["青山", "由井", "関", "夏目", "今大路", "渡部", "朝霧", "菅野", "荒木田", "服部", "桧山", "大谷", "神楽", "槙", "誠", "京介", "新堂", "カナメ", "桐嶋", "九条", "宮瀬", "可愛", "宝生", "日向", "早乙女", "瀬尾"];
 const affiliations = ["マトリ", "警視庁", "Revel", "都築兄弟", "九条家", "瀬尾研究室"];
 
 const itemsData = {
@@ -293,7 +293,6 @@ const itemsData = {
       { name: "ビジュアルタオル", price: 3850 }
     ],
     smOpen: [
-      // 所属展開フラグ (hasAffiliation: true) を追加
       { name: "【所属別】サンドクッキー「Hands in Black」", price: 1728, hasAffiliation: true },
       { name: "【所属別】入浴剤", price: 3300, hasAffiliation: true },
       { name: "●BOX商品● 缶バッジ「Hands in Black」【マトリ・都築兄弟・九条家】", price: 7150 },
@@ -351,7 +350,6 @@ const itemsData = {
       { name: "アクリルスタンド(UR柄）", price: 1650 }
     ],
     smOpen: [
-      // 所属展開フラグ (hasAffiliation: true) を追加
       { name: "【所属別】10th Anniversary mini 手ぬぐい", price: 1540, hasAffiliation: true },
       { name: "●BOX商品● 10th Anniversary 缶バッジ【マトリ・都築兄弟・九条家】", price: 7150 },
       { name: "●BOX商品● 10th Anniversary 缶バッジ【警視庁・Revel・瀬尾研究室】", price: 7150 },
@@ -389,7 +387,6 @@ const itemsData = {
 };
 
 function createItemCard(item, isCharItem = false, charList = [], periodKey = "", categoryKey = "", index = 0) {
-// 所属選択型の商品（手ぬぐい・サンドクッキー・入浴剤）
   if (item.hasAffiliation) {
     const listId = `affil-list-${periodKey}-${categoryKey}-${index}`;
     const affilHtml = affiliations.map(a => `
@@ -403,7 +400,6 @@ function createItemCard(item, isCharItem = false, charList = [], periodKey = "",
       </div>
     `).join('');
 
-    // ★ 次の商品が「所属別」でない（＝所属別の最後の商品）場合のみ、下に破線を入れる
     const currentList = itemsData[periodKey]?.[categoryKey === "スタマイ（その他）" ? "smOpen" : "dmOpen"] || [];
     const isLastAffil = !currentList[index + 1]?.hasAffiliation;
     const dividerHtml = isLastAffil ? `<div style="border-bottom: 1px dashed #ccc; margin: 15px 0 10px;"></div>` : '';
@@ -425,7 +421,6 @@ function createItemCard(item, isCharItem = false, charList = [], periodKey = "",
     `;
   }
 
-  // キャラ選択型の商品
   if (isCharItem) {
     const listId = `char-list-${periodKey}-${categoryKey}-${index}`;
     const charsHtml = charList.map(c => `
@@ -455,7 +450,6 @@ function createItemCard(item, isCharItem = false, charList = [], periodKey = "",
     `;
   }
 
-  // 通常商品
   return `
     <div class="item-card">
       <div class="item-main">
@@ -498,11 +492,15 @@ function renderAll() {
   });
 }
 
+// 数量更新時に保存イベント（change）を発火させるよう修復
 function updateQty(btn, change) {
   const input = btn.parentElement.querySelector('input');
   let currentVal = parseInt(input.value) || 0;
   currentVal = Math.max(0, currentVal + change);
   input.value = currentVal;
+  
+  // イベントを発火して自動保存を呼ぶ
+  input.dispatchEvent(new Event('change', { bubbles: true }));
   calculateTotal();
 }
 
@@ -574,7 +572,6 @@ function generateImage() {
     return;
   }
 
-  // サマリー生成
   const summaryContent = document.getElementById('summary-content');
   summaryContent.innerHTML = '';
 
@@ -609,14 +606,12 @@ function generateImage() {
   document.getElementById('summary-total-price').innerText = `¥${total.toLocaleString()}`;
   document.getElementById('summary-bonus-count').innerText = Math.floor(total / 3000);
 
-  // キャプチャ用に表示
   const summaryCard = document.getElementById('summary-card');
   summaryCard.style.display = 'block';
 
   html2canvas(summaryCard, { scale: 2 }).then(canvas => {
-    summaryCard.style.display = 'none'; // 非表示に戻す
+    summaryCard.style.display = 'none';
 
-    // PNGダウンロード
     const link = document.createElement('a');
     link.download = '周年ストア購入リスト.png';
     link.href = canvas.toDataURL('image/png');
@@ -627,17 +622,14 @@ function generateImage() {
   });
 }
 
+// 画面を生成
 renderAll();
-</script>
- <script>
+
+// ローカルストレージ連動処理
 document.addEventListener('DOMContentLoaded', () => {
   const STORAGE_KEY = 'drmt11th_stmy10th_state';
 
-  // inputのユニークキー（特定用識別子）を生成する関数
   function getInputKey(el) {
-    if (el.id) return el.id;
-    if (el.name) return el.name;
-    // data属性を使って一意のキーを作成
     const period = el.dataset.period || '';
     const category = el.dataset.category || '';
     const name = el.dataset.name || '';
@@ -645,17 +637,17 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${period}_${category}_${name}_${char}`;
   }
 
-  // --- 状態の保存 ---
   function saveState() {
     const data = {};
     document.querySelectorAll('input[type="number"]').forEach((el) => {
       const key = getInputKey(el);
-      data[key] = el.value;
+      if (el.value && parseInt(el.value) > 0) {
+        data[key] = el.value;
+      }
     });
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   }
 
-  // --- 状態の復元 ---
   function loadState() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (!saved) return;
@@ -666,7 +658,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (data.hasOwnProperty(key)) {
           el.value = data[key];
 
-          // 数値が入っている場合は、折りたたまれているキャラ/所属リストを開く
           if (parseInt(data[key]) > 0) {
             const charList = el.closest('.char-list');
             if (charList) {
@@ -675,21 +666,18 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
       });
-      // 合計金額と特典数を再計算
       calculateTotal();
     } catch (e) {
       console.error('復元エラー:', e);
     }
   }
 
-  // --- リセット処理 ---
   function resetState() {
     if (!confirm('選択状態をリセットしますか？')) return;
     localStorage.removeItem(STORAGE_KEY);
     location.reload();
   }
 
-  // イベント設定
   document.addEventListener('change', saveState);
   document.addEventListener('input', saveState);
   
@@ -698,7 +686,6 @@ document.addEventListener('DOMContentLoaded', () => {
     resetBtn.addEventListener('click', resetState);
   }
 
-  // 初期読み込み時に復元を実行
   loadState();
 });
 </script>
